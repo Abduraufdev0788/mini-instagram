@@ -65,3 +65,27 @@ class Register(View):
 
         new_user.save()
         return JsonResponse({"message": "succes"})
+    
+
+class Login(View):
+    def get(self,request: HttpRequest)->HttpResponse:
+        return render(request=request, template_name="login.html")
+    
+    def post(self, request:HttpRequest)->HttpResponse:
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        if not username:
+            return JsonResponse({"message":"username required"}, status = 403)
+        
+        if not password:
+            return JsonResponse({"message": "password required"})
+        
+        user =Users.objects.get(username = username)
+
+        if user.password != password:
+            return JsonResponse({"message": "incorrect password"}, status=403)
+        
+        request.session["user_id"] = user.id
+
+        return JsonResponse({"message": "login success"})
