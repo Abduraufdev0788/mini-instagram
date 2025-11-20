@@ -1,0 +1,498 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ro'yxatdan O'tish - AG App</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        position: relative;
+        
+    }
+
+    /* Animated background shapes */
+    .bg-shape {
+        position: fixed;
+        opacity: 0.1;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-1 {
+        width: 300px;
+        height: 300px;
+        background: #fff;
+        border-radius: 45% 55% 60% 40% / 55% 45% 40% 60%;
+        top: -100px;
+        left: -100px;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 250px;
+        height: 250px;
+        background: #fff;
+        border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        bottom: -50px;
+        right: -100px;
+        animation: float 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(30px) rotate(10deg); }
+    }
+
+    .container {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 50px;
+        width: 100%;
+        max-width: 450px;
+        backdrop-filter: blur(10px);
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .header h1 {
+        font-size: 28px;
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .header p {
+        color: #999;
+        font-size: 14px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        gap: 15px;
+    }
+
+    .form-group.full {
+        flex-direction: column;
+    }
+
+    .form-group input {
+        flex: 1;
+    }
+
+    .form-field {
+        position: relative;
+        animation: fadeIn 0.6s ease-out backwards;
+    }
+
+    .form-field:nth-child(1) { animation-delay: 0.1s; }
+    .form-field:nth-child(2) { animation-delay: 0.2s; }
+    .form-field:nth-child(3) { animation-delay: 0.3s; }
+    .form-field:nth-child(4) { animation-delay: 0.4s; }
+    .form-field:nth-child(5) { animation-delay: 0.5s; }
+    .form-field:nth-child(6) { animation-delay: 0.6s; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="file"] {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="file"]:focus {
+        outline: none;
+        border-color: #667eea;
+        background-color: #f8f9ff;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+
+    input::placeholder {
+        color: #bbb;
+    }
+
+    .password-strength {
+        margin-top: 5px;
+        height: 4px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .strength-bar {
+        height: 100%;
+        width: 0%;
+        background: #ff6b6b;
+        transition: all 0.3s ease;
+    }
+
+    .strength-bar.medium {
+        width: 50%;
+        background: #ffd93d;
+    }
+
+    .strength-bar.strong {
+        width: 100%;
+        background: #6bcf7f;
+    }
+
+    .submit-btn {
+        padding: 14px;
+        border: none;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s ease;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .footer-text {
+        text-align: center;
+        margin-top: 20px;
+        color: #999;
+        font-size: 13px;
+    }
+
+    .footer-text a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .footer-text a:hover {
+        color: #764ba2;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .error-message {
+        color: #ff6b6b;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+        animation: shake 0.3s ease;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    input.error {
+        border-color: #ff6b6b;
+        background-color: #fff5f5;
+    }
+
+    .success-icon {
+        display: none;
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6bcf7f;
+        font-size: 18px;
+    }
+
+    input.success ~ .success-icon {
+        display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+        .container {
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .form-group {
+            flex-direction: column;
+        }
+
+        .form-group input {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+<body>
+    <!-- Animated background shapes -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Xush Kelibsiz</h1>
+            <p>Akkount yaratish orqali boshlang</p>
+        </div>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <div class="form-field">
+                    <label for="first_name">Ism</label>
+                    <input type="text" id="first_name" name="first_name" placeholder="Sizning ismingiz" required>
+                    <span class="success-icon">✓</span>
+                    {% if form.first_name.errors %}
+                        <div class="error-message show">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-field">
+                    <label for="last_name">Familiya</label>
+                    <input type="text" id="last_name" name="last_name" placeholder="Sizning familiyangiz" required>
+                    <span class="success-icon">✓</span>
+                    {% if form.last_name.errors %}
+                        <div class="error-message show">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group full">
+                <div class="form-field">
+                    <label for="username">Foydalanuvchi nomi</label>
+                    <input type="text" id="username" name="username" placeholder="Noyob foydalanuvchi nomi tanlang" required>
+                    <span class="success-icon">✓</span>
+                    {% if form.username.errors %}
+                        <div class="error-message show">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group full">
+                <div class="form-field">
+                    <label for="email">Email manzili</label>
+                    <input type="email" id="email" name="email" placeholder="siz@example.com" required>
+                    <span class="success-icon">✓</span>
+                    {% if form.email.errors %}
+                        <div class="error-message show">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group full">
+                <div class="form-field">
+                    <label for="password">Parol</label>
+                    <input type="password" id="password" name="password" placeholder="Xavfsiz parol kiriting" required>
+                    <div class="password-strength">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                    <span class="success-icon">✓</span>
+                    {% if form.password.errors %}
+                        <div class="error-message show">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group full">
+                <div class="form-field">
+                    <label for="confirm_password">Parolni tasdiqlash</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Parolni qaytadan kiriting" required>
+                    <span class="success-icon">✓</span>
+                    <div class="error-message" id="confirmError">Parollar mos kelmadi</div>
+                </div>
+            </div>
+
+            <div class="form-group full">
+                <div class="form-field">
+                    <label for="image">Profil rasmi (ixtiyoriy)</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <span class="success-icon">✓</span>
+                    {% if form.image.errors %}
+                        <div class="error-message show">{{ form.image.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Akkount Yaratish</button>
+
+            <div class="footer-text">
+                <input type="checkbox" id="terms" required>
+                <label for="terms" style="display: inline; text-transform: none; margin: 0;">
+                    Shartlar bilan roziman
+                </label>
+            </div>
+
+            <div class="login-link">
+                Allaqachon akkountingiz bormi? 
+                <a href="">Kirish</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Password strength indicator
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const strengthBar = document.getElementById('strengthBar');
+        const form = document.querySelector('form');
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+
+        passwordInput.addEventListener('input', function() {
+            const strength = checkPasswordStrength(this.value);
+            strengthBar.classList.remove('medium', 'strong');
+            if (strength === 1) strengthBar.classList.add('medium');
+            else if (strength === 2) strengthBar.classList.add('strong');
+        });
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            return strength > 2 ? 2 : strength > 1 ? 1 : 0;
+        }
+
+        // Form validation and confirm password
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() !== '') this.classList.add('success');
+                else this.classList.remove('success');
+            });
+
+            input.addEventListener('focus', function() {
+                this.classList.remove('error');
+                const errorMsg = this.parentElement.querySelector('.error-message');
+                if (errorMsg) errorMsg.classList.remove('show');
+            });
+        });
+
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            inputs.forEach(input => {
+                if (input.value.trim() === '' && input.required) {
+                    input.classList.add('error');
+                    const errorMsg = input.parentElement.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.textContent = 'Ushbu maydon majburiy';
+                        errorMsg.classList.add('show');
+                    }
+                    isValid = false;
+                }
+            });
+
+            // Confirm password
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                isValid = false;
+                confirmPasswordInput.classList.add('error');
+                document.getElementById('confirmError').classList.add('show');
+            } else {
+                document.getElementById('confirmError').classList.remove('show');
+            }
+
+            if (!document.getElementById('terms').checked) {
+                isValid = false;
+                alert('Shartlar bilan rozimansiz');
+            }
+
+            if (!isValid) e.preventDefault();
+        });
+    </script>
+</body>
+</html>

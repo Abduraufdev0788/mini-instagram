@@ -33,4 +33,4 @@ class Profile(models.Model):
     jobs = models.CharField(choices=JOB_CHOICES, null=True, blank=True, default = "student")
 
     def __str__(self):
-        return f"{id}. {Users.first_name}"
+        return f"{self.id}. {self.user.first_name}"
