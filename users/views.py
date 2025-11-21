@@ -125,10 +125,11 @@ class ForgotPass(View):
             return JsonResponse({"message": "data is not defound"}, status = 404)
         
         code = send_reset_code(email)
+        user = Users.objects.get(email=email)
 
         request.session["reset_code"] = str(code)
         request.session["reset_email"] = email
-        return render(request=request, template_name="v_code.html")
+        return render(request=request, template_name="v_code.html", context={"user": user})
 
 class CodeValidate(View):    
     def get(self, request:HttpRequest)->HttpResponse:
@@ -158,5 +159,5 @@ class CodeValidate(View):
             return JsonResponse({"message": "code valid"}, status=200)
         
 
-        return JsonResponse({"message": "code invalid"}, status=400)
+        return JsonResponse({"message": "code invalid"}, status=403)
 
