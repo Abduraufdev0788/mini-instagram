@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 420px;
+            margin: 80px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid #ddd;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+            color: #222;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 8px;
+            border: 1px solid #bbb;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4a6cf7;
+            color: white;
+            margin-top: 15px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .error {
+            margin-top: 15px;
+            color: red;
+            font-weight: bold;
+            display: none;
+        }
+
+        .success {
+            margin-top: 15px;
+            color: green;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="container">
+
+        <img src="/media/{{ user.image }}" class="avatar" alt="avatar">
+
+        <h2>Reset Your Password</h2>
+
+        <form method="POST" id="resetForm" action="{% url 'reset_pass' %}">
+            {% csrf_token %}
+
+            <input type="password" name="password" id="password" placeholder="New password">
+            <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm password">
+
+            <button type="submit">Reset Password</button>
+
+            <p class="error" id="errorBox"></p>
+            <p class="success" id="successBox"></p>
+        </form>
+    </div>
+
+
+    <script>
+    const form = document.getElementById("resetForm");
+
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.status !== 200) {
+            document.getElementById("errorBox").style.display = "block";
+            document.getElementById("successBox").style.display = "none";
+            document.getElementById("errorBox").innerText = data.message;
+        } else {
+            document.getElementById("successBox").style.display = "block";
+            document.getElementById("errorBox").style.display = "none";
+            document.getElementById("successBox").innerText = data.message;
+
+            setTimeout(() => {
+                window.location.href = "{% url 'login' %}";
+            }, 1500);
+        }
+    });
+</script>
+
+
+</body>
+</html>

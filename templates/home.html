@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            font-family: Arial, sans-serif;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            width: 100%;
+            height: 70px;
+            background: #4a6cf7;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            color: white;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .navbar .right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* CONTENT */
+        .content {
+            max-width: 900px;
+            margin: 80px auto;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 38px;
+            color: #222;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: #4a6cf7;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="logo">MySite</div>
+
+        <div class="right">
+
+            {% if user %}
+                <span>Hi, <b>{{ user.first_name }}</b></span>
+                <img src="/media/{{ user.image }}" class="avatar" alt="">
+                <a href="/logout/">Logout</a>
+            {% else %}
+                <a href="/login/">Login</a>
+                <a href="/register/">Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
+
+        {% if user %}
+            <h1>Welcome back, {{ user.first_name }} 👋</h1>
+            <p>This is your dashboard. You can manage your profile, update your data, or continue browsing.</p>
+
+            <a href="/profile/" class="btn">Go to Profile</a>
+
+        {% else %}
+            <h1>Welcome to Our Website</h1>
+            <p>Please register or login to enter your account.</p>
+
+            <a href="/register/" class="btn">Create Account</a>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

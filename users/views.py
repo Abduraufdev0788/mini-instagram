@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 from django.core.mail import send_mail
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.contrib.auth.hashers import make_password, check_password
 from dotenv import load_dotenv
 
 import random
@@ -11,12 +12,13 @@ from .models import Users
 
 load_dotenv()
 
-class Register(View):
-    def get(self, request:HttpRequest)->HttpResponse:
-        return render(request=request, template_name="register.html")
-    
 
-    def post(self,request:HttpRequest)->HttpResponse:
+# ========================= REGISTER =========================
+class Register(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
+        return render(request, "register.html")
+    
+    def post(self, request: HttpRequest) -> HttpResponse:
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         username = request.POST.get("username")
@@ -25,139 +27,169 @@ class Register(View):
         confirm_password = request.POST.get("confirm_password")
         image = request.FILES.get("image")
 
-
+        # ===== Validations =====
         if not first_name:
-            return JsonResponse({"first_name": "required"}, status =403)
-        if len(first_name) >128:
-            return JsonResponse({'message': 'max 128 characters'})
+            return JsonResponse({"first_name": "required"}, status=403)
+        if len(first_name) > 128:
+            return JsonResponse({"first_name": "max 128 characters"}, status=403)
         
-
         if not last_name:
-            return JsonResponse({"last_name": "required"}, status =403)
-        if len(last_name) >128:
-            return JsonResponse({'message': 'max 128 characters'})
+            return JsonResponse({"last_name": "required"}, status=403)
+        if len(last_name) > 128:
+            return JsonResponse({"last_name": "max 128 characters"}, status=403)
         
         if not username:
-            return JsonResponse({"username":"required"}, status = 403)
-        if len("username")> 128:
-            return JsonResponse({"message": "max 128 characters"}, status = 403)
-        if Users.objects.filter(username=username).exists():
-            return JsonResponse({"message": "This username is busy"}, status = 403)
+            return JsonResponse({"username": "required"}, status=403)
+        if len(username) > 128:
+            return JsonResponse({"username": "max 128 characters"}, status=403)
         if not username.startswith("@"):
-            return JsonResponse({"message": "Must start with @"}, status = 403)
+            return JsonResponse({"username": "must start with @"}, status=403)
+        if Users.objects.filter(username=username).exists():
+            return JsonResponse({"username": "This username is busy"}, status=403)
         
         if not email:
-            return JsonResponse({"message": "email required"}, status = 403)
-        if Users.objects.filter(email=email).exists():
-            return JsonResponse({"message": "This username is busy"}, status = 403)
+            return JsonResponse({"email": "required"}, status=403)
         if not email.endswith("@gmail.com"):
-            return JsonResponse({"message": "It should be @gmail.com after all."}, status = 403)
+            return JsonResponse({"email": "must be @gmail.com"}, status=403)
+        if Users.objects.filter(email=email).exists():
+            return JsonResponse({"email": "This email is busy"}, status=403)
         
         if not password:
-            return JsonResponse({"message": "password required"})
+            return JsonResponse({"password": "required"}, status=403)
         if len(password) < 8:
-            return JsonResponse({"message": "min 8 characters"})
+            return JsonResponse({"password": "min 8 characters"}, status=403)
         if len(password) > 256:
-            return JsonResponse({"message": "max 256 characters"})
+            return JsonResponse({"password": "max 256 characters"}, status=403)
         if not password.isalnum():
-            return JsonResponse({"message": "must consist of letters and numbers"}, status = 403)
+            return JsonResponse({"password": "must consist of letters and numbers"}, status=403)
+        if password != confirm_password:
+            return JsonResponse({"password": "passwords do not match"}, status=403)
         
+        # ===== Save User =====
         new_user = Users(
-            first_name = first_name,
-            last_name = last_name,
-            username = username,
-            email = email,
-            password = password,
-            image = image
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            email=email,
+            password=make_password(password),
+            image=image
         )
-
         new_user.save()
-        return JsonResponse({"message": "succes"})
-    
 
+        return JsonResponse({"message": "success"}, status=201)
+
+
+# ========================= LOGIN =========================
 class Login(View):
-    def get(self,request: HttpRequest)->HttpResponse:
-        return render(request=request, template_name="login.html")
+    def get(self, request: HttpRequest) -> HttpResponse:
+        return render(request, "login.html")
     
-    def post(self, request:HttpRequest)->HttpResponse:
+    def post(self, request: HttpRequest) -> HttpResponse:
         username = request.POST.get("username")
         password = request.POST.get("password")
 
         if not username:
-            return JsonResponse({"message":"username required"}, status = 403)
-        
+            return JsonResponse({"username": "required"}, status=403)
         if not password:
-            return JsonResponse({"message": "password required"})
-        
-        user =Users.objects.get(username = username)
+            return JsonResponse({"password": "required"}, status=403)
 
-        if user.password != password:
+        user = Users.objects.filter(username=username).first()
+        if not user:
+            return JsonResponse({"message": "user not found"}, status=404)
+        if not check_password(password, user.password):
             return JsonResponse({"message": "incorrect password"}, status=403)
-        
-        request.session["user_id"] = user.id
 
-        return JsonResponse({"message": "login success"})
-    
+        request.session["user_id"] = user.id
+        return JsonResponse({"message": "login success"}, status=200)
+
+
+# ========================= SEND RESET CODE =========================
 def send_reset_code(email):
     code = random.randint(100000, 999999)
-
     send_mail(
         subject="Parolni tiklash kodi",
         message=f"Sizning tasdiqlash kodingiz: {code}",
         from_email=os.getenv("EMAIL_HOST_USER"),
         recipient_list=[email],
     )
+    return str(code)  # string sifatida saqlash
 
-    return code
 
-    
+# ========================= FORGOT PASSWORD =========================
 class ForgotPass(View):
-    def get(self, request:HttpRequest)->HttpResponse:
-        return render(request=request, template_name="forgot.html")
+    def get(self, request: HttpRequest) -> HttpResponse:
+        return render(request, "forgot.html")
     
-    def post(self, request:HttpRequest)->HttpResponse:
+    def post(self, request: HttpRequest) -> HttpResponse:
         email = request.POST.get("email")
-        data = Users.objects.filter(email=email).exists()
-
         if not email:
-            return JsonResponse({"message": "email required"}, status = 403)
-        if not data:
-            return JsonResponse({"message": "data is not defound"}, status = 404)
+            return JsonResponse({"message": "email required"}, status=403)
+        user = Users.objects.filter(email=email).first()
+        if not user:
+            return JsonResponse({"message": "user not found"}, status=404)
         
         code = send_reset_code(email)
-        user = Users.objects.get(email=email)
-
-        request.session["reset_code"] = str(code)
+        request.session["reset_code"] = code
         request.session["reset_email"] = email
-        return render(request=request, template_name="v_code.html", context={"user": user})
-
-class CodeValidate(View):    
-    def get(self, request:HttpRequest)->HttpResponse:
-        email = request.session.get("reset_email")
-
-        if not email:
-            return JsonResponse({"message": "email not found"}, status=403)
-
-        user = Users.objects.get(email=email)
 
         return render(request, "v_code.html", {"user": user})
-    
-    def post(self, request: HttpRequest)->HttpResponse:
-        reset_code = request.session.get("reset_code")
+
+
+# ========================= CODE VALIDATE =========================
+class CodeValidate(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
         email = request.session.get("reset_email")
+        if not email:
+            return JsonResponse({"message": "email not found"}, status=403)
+        user = Users.objects.get(email=email)
+        return render(request, "v_code.html", {"user": user})
+    
+    def post(self, request: HttpRequest) -> HttpResponse:
+        email = request.session.get("reset_email")
+        saved_code = request.session.get("reset_code")
+        code = request.POST.get("code")
+        user = Users.objects.get(email=email)
 
-        c1 = request.POST.get('c1', '')
-        c2 = request.POST.get('c2', '')
-        c3 = request.POST.get('c3', '')
-        c4 = request.POST.get('c4', '')
-        c5 = request.POST.get('c5', '')
-        c6 = request.POST.get('c6', '')
-
-        validate_code = f"{c1}{c2}{c3}{c4}{c5}{c6}"
-
-        if validate_code == reset_code:
-            return JsonResponse({"message": "code valid"}, status=200)
+        if not code:
+            return JsonResponse({"message": "code required"}, status=401)
+        if code != saved_code:
+            return JsonResponse({"message": "invalid code"}, status=403)
         
+        return render(request=request, template_name="reset_pass.html", context={"user":user})
 
-        return JsonResponse({"message": "code invalid"}, status=403)
 
+# ========================= RESET PASSWORD =========================
+class ResetPass(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
+        email = request.session.get("reset_email")
+        if not email:
+            return JsonResponse({"message": "email not found"}, status=403)
+        
+        return render(request, "reset_pass.html")
+    
+    def post(self, request: HttpRequest) -> HttpResponse:
+        email = request.session.get("reset_email")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if not password:
+            return JsonResponse({"message": "password required"}, status=403)
+        if len(password) < 8:
+            return JsonResponse({"message": "min 8 characters"}, status=403)
+        if len(password) > 256:
+            return JsonResponse({"message": "max 256 characters"}, status=403)
+        if not password.isalnum():
+            return JsonResponse({"message": "must consist of letters and numbers"}, status=403)
+        if password != confirm_password:
+            return JsonResponse({"message": "passwords do not match"}, status=403)
+
+        user = Users.objects.get(email=email)
+        user.password = make_password(password)
+        user.save()
+
+        return JsonResponse({"message": "password reset successful"}, status=200)
+    
+
+class Profile(View):
+    def get(self, request:HttpRequest)->HttpResponse:
+        return render(request=request, template_name="home.html")
