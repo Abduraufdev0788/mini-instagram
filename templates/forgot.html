@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forgot Password - Reset Your Account</title>
+<style>
+/* Sizning original CSS kodingiz shu yerda bo‘lishi mumkin — hech o‘zgarmaydi */
+* {margin:0;padding:0;box-sizing:border-box;}
+body {font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); position:relative; overflow:hidden;}
+.bg-shape{position:absolute;border-radius:50%;opacity:0.1;animation:float 6s ease-in-out infinite;}
+.shape-1{width:300px;height:300px;background:#fff;top:-50px;left:-50px;animation-delay:0s;}
+.shape-2{width:200px;height:200px;background:#fff;bottom:50px;right:-50px;animation-delay:2s;}
+.shape-3{width:150px;height:150px;background:#fff;top:50%;left:10%;animation-delay:4s;}
+@keyframes float{0%,100%{transform:translateY(0px);}50%{transform:translateY(30px);}}
+.container{background:white;padding:50px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:450px;width:100%;z-index:10;animation:slideUp 0.6s ease-out;}
+@keyframes slideUp{from{opacity:0; transform:translateY(30px);} to{opacity:1; transform:translateY(0);}}
+.forgot-icon{text-align:center;margin-bottom:30px;}
+.forgot-icon svg{width:60px;height:60px;animation:iconBounce 2s ease-in-out infinite;}
+@keyframes iconBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+h1{text-align:center;color:#333;font-size:28px;margin-bottom:10px;font-weight:700;}
+.subtitle{text-align:center;color:#666;font-size:14px;margin-bottom:30px;line-height:1.6;}
+.form-group{margin-bottom:25px;}
+label{display:block;color:#333;font-weight:600;margin-bottom:8px;font-size:14px;}
+input[type="email"]{width:100%;padding:14px 16px;border:2px solid #e0e0e0;border-radius:10px;font-size:15px;transition:all 0.3s ease;background:#f9f9f9;}
+input[type="email"]:focus{outline:none;border-color:#667eea;background:white;box-shadow:0 0 0 3px rgba(102,126,234,0.1);transform:translateY(-2px);}
+input[type="email"]::placeholder{color:#999;}
+.email-info{display:flex;align-items:flex-start;gap:10px;background:#f0f4ff;padding:12px;border-radius:8px;margin-bottom:20px;font-size:13px;color:#555;border-left:4px solid #667eea;}
+.email-info svg{width:18px;height:18px;flex-shrink:0;margin-top:2px;color:#667eea;}
+.submit-btn{width:100%;padding:14px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease;margin-bottom:15px;}
+.submit-btn:hover{transform:translateY(-3px);box-shadow:0 10px 25px rgba(102,126,234,0.4);}
+.submit-btn:active{transform:translateY(-1px);}
+.back-link{text-align:center;}
+.back-link a{color:#667eea;text-decoration:none;font-size:14px;font-weight:600;transition:all 0.3s ease;display:inline-flex;align-items:center;gap:5px;}
+.back-link a:hover{color:#764ba2;}
+.error-message{display:block; background:#f8d7da;color:#721c24;padding:15px;border-radius:10px;margin-bottom:20px;text-align:center;border-left:4px solid #dc3545;}
+@media (max-width:480px){.container{padding:30px;max-width:100%;margin:20px;} h1{font-size:24px;} .bg-shape{width:200px !important;height:200px !important;}}
+</style>
+</head>
+<body>
+<div class="bg-shape shape-1"></div>
+<div class="bg-shape shape-2"></div>
+<div class="bg-shape shape-3"></div>
+
+<div class="container">
+    <div class="forgot-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+            <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </svg>
+    </div>
+
+    <h1>Forgot Your Password?</h1>
+    <p class="subtitle">No worries! Enter your email address and we'll send you a link to reset your password.</p>
+
+    <div class="email-info">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path>
+        </svg>
+        <span>We'll send a secure reset link to your registered email address.</span>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                placeholder="Enter your registered email"
+                required
+                autocomplete="email"
+            >
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="submit-btn">Send Reset Link</button>
+    </form>
+
+    <div class="back-link">
+        <a href="{% url 'login' %}">← Back to Login</a>
+    </div>
+</div>
+</body>
+</html>

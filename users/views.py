@@ -1,7 +1,15 @@
 from django.shortcuts import render
 from django.views import View
+from django.core.mail import send_mail
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from dotenv import load_dotenv
+
+import random
+import os
+
 from .models import Users
+
+load_dotenv()
 
 class Register(View):
     def get(self, request:HttpRequest)->HttpResponse:
@@ -89,3 +97,39 @@ class Login(View):
         request.session["user_id"] = user.id
 
         return JsonResponse({"message": "login success"})
+    
+def send_reset_code(email):
+    code = random.randint(100000, 999999)
+
+    send_mail(
+        subject="Parolni tiklash kodi",
+        message=f"Sizning tasdiqlash kodingiz: {code}",
+        from_email=os.getenv("EMAIL_HOST_USER"),
+        recipient_list=[email],
+    )
+
+    return code
+
+    
+class ForgotPass(View):
+    def get(self, request:HttpRequest)->HttpResponse:
+        return render(request=request, template_name="forgot.html")
+    
+    def post(self, request:HttpRequest)->HttpResponse:
+        email = request.POST.get("email")
+        data = Users.objects.filter(email=email).exists()
+
+        if not email:
+            return JsonResponse({"message": "email required"}, status = 403)
+        if not data:
+            return JsonResponse({"message": "data is not defound"}, status = 404)
+        
+        code = send_reset_code(email)
+
+        request.session["reset_code"] = str(code)
+        request.session["reset_email"] = email
+
+        return render(request=request, template_name="v_code.html")
+
+class CodeValidate(View):
+    
