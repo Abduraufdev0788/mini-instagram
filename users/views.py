@@ -128,8 +128,35 @@ class ForgotPass(View):
 
         request.session["reset_code"] = str(code)
         request.session["reset_email"] = email
-
         return render(request=request, template_name="v_code.html")
 
-class CodeValidate(View):
+class CodeValidate(View):    
+    def get(self, request:HttpRequest)->HttpResponse:
+        email = request.session.get("reset_email")
+
+        if not email:
+            return JsonResponse({"message": "email not found"}, status=403)
+
+        user = Users.objects.get(email=email)
+
+        return render(request, "v_code.html", {"user": user})
     
+    def post(self, request: HttpRequest)->HttpResponse:
+        reset_code = request.session.get("reset_code")
+        email = request.session.get("reset_email")
+
+        c1 = request.POST.get('c1', '')
+        c2 = request.POST.get('c2', '')
+        c3 = request.POST.get('c3', '')
+        c4 = request.POST.get('c4', '')
+        c5 = request.POST.get('c5', '')
+        c6 = request.POST.get('c6', '')
+
+        validate_code = f"{c1}{c2}{c3}{c4}{c5}{c6}"
+
+        if validate_code == reset_code:
+            return JsonResponse({"message": "code valid"}, status=200)
+        
+
+        return JsonResponse({"message": "code invalid"}, status=400)
+

@@ -133,10 +133,11 @@
     <div class="verify-box">
 
         <!-- Foydalanuvchi rasmi -->
-        <img src="{{ user.profile.image.url }}" class="avatar">
+        <img src="{{ user.image.url }}" class="avatar">
+
 
         <h2>Enter Verification Code</h2>
-        <p class="subtitle">We sent a 6-digit code to <b>{{ email }}</b></p>
+        <p class="subtitle">We sent a 6-digit code to <b>{{user.email}}</b></p>
 
         <div class="error-message" id="errorBox"></div>
 
