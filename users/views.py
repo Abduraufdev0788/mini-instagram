@@ -76,7 +76,7 @@ class Register(View):
         )
         new_user.save()
 
-        return JsonResponse({"message": "success"}, status=201)
+        return render(request=request, template_name="home.html")
 
 
 # ========================= LOGIN =========================
@@ -100,7 +100,7 @@ class Login(View):
             return JsonResponse({"message": "incorrect password"}, status=403)
 
         request.session["user_id"] = user.id
-        return JsonResponse({"message": "login success"}, status=200)
+        return render(request=request, template_name="home.html")
 
 
 # ========================= SEND RESET CODE =========================
@@ -187,7 +187,7 @@ class ResetPass(View):
         user.password = make_password(password)
         user.save()
 
-        return JsonResponse({"message": "password reset successful"}, status=200)
+        return render(request=request, template_name="home.html")
     
 
 class Profile(View):
